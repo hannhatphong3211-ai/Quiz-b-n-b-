@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Siêu Bài Test Tri Kỷ - Đo Mức Độ Hiểu Nhau</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti for Celebration Effects -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Google Font Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        /* Custom Theme Gradients & Backgrounds */
+        .theme-cute {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #feada6 100%);
+            --accent: #ff477e;
+            --accent-hover: #ff0054;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --text-main: #2b2d42;
+        }
+
+        .theme-cyberpunk {
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            --accent: #00f5d4;
+            --accent-hover: #00bbac;
+            --card-bg: rgba(15, 23, 42, 0.9);
+            --text-main: #f8fafc;
+        }
+
+        .theme-neon {
+            background: linear-gradient(135deg, #121212 0%, #1e1b4b 50%, #311042 100%);
+            --accent: #a855f7;
+            --accent-hover: #9333ea;
+            --card-bg: rgba(24, 24, 27, 0.92);
+            --text-main: #f4f4f5;
+        }
+
+        .theme-pastel {
+            background: linear-gradient(135deg, #a8edd9 0%, #fed6e3 100%);
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --card-bg: rgba(255, 255, 255, 0.92);
+            --text-main: #1e293b;
+        }
+
+        /* Glassmorphism Card Style */
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        /* Smooth Button & Card Transitions */
+        .btn-theme {
+            background-color: var(--accent);
+            color: #ffffff;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-theme:hover {
+            filter: brightness(1.1);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .btn-theme:active {
+            transform: translateY(0);
+        }
+
+        .option-card {
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+        }
+
+        .option-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--accent);
+        }
+
+        .option-card.selected {
+            border-color: var(--accent);
+            background-color: rgba(99, 102, 241, 0.12);
+        }
+
+        /* Floating animation for icons */
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(3deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+        .animate-float {
+            animation: float 4s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="theme-cute min-h-screen flex items-center justify-center p-3 sm:p-6 transition-all duration-500 text-gray-800">
+
+    <!-- Custom Toast Message Notification -->
+    <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 transform -translate-y-20 opacity-0 transition-all duration-300 bg-gray-900 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 border border-gray-700 pointer-events-none">
+        <i id="toast-icon" class="fas fa-check-circle text-green-400 text-lg"></i>
+        <span id="toast-msg" class="font-semibold text-sm">Thông báo</span>
+    </div>
+
+    <!-- Main App Container -->
+    <div class="w-full max-w-xl mx-auto">
+        
+        <!-- Header Banner -->
+        <div class="text-center mb-6">
+            <div class="inline-block p-4 rounded-full bg-white/30 backdrop-blur-md mb-2 shadow-inner animate-float">
+                <span class="text-5xl" id="header-emoji">🤝</span>
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight drop-shadow-sm text-gray-900 dark:text-white" id="app-title">
+                Siêu Quiz Tri Kỷ
+            </h1>
+            <p class="text-sm sm:text-base opacity-90 mt-1 font-medium text-gray-800 dark:text-gray-200" id="app-subtitle">
+                Đo độ hiểu nhau xem có phải "Bạn thân ai nấy lo" không nhé!
+            </p>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SCREEN 1: CHỌN THEME & NHẬP TÊN CỦA CHỦ QUIZ -->
+        <!-- ========================================== -->
+        <div id="screen-setup" class="glass-card rounded-3xl p-6 sm:p-8 transition-all duration-300">
+            <div class="space-y-6">
+                <!-- Select Theme -->
+                <div>
+                    <label class="block text-sm font-bold uppercase tracking-wider mb-3 text-gray-700 dark:text-gray-200">
+                        <i class="fas fa-palette mr-2"></i>1. Chọn phong cách giao diện:
+                    </label>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                        <button onclick="setTheme('cute')" class="p-3 rounded-2xl border-2 text-xs font-bold flex flex-col items-center gap-1.5 bg-pink-100 text-pink-700 border-pink-400 hover:scale-105 transition">
+                            <span class="text-lg">🌸</span> Đáng Yêu
+                        </button>
+                        <button onclick="setTheme('cyberpunk')" class="p-3 rounded-2xl border-2 text-xs font-bold flex flex-col items-center gap-1.5 bg-slate-900 text-cyan-400 border-cyan-500 hover:scale-105 transition">
+                            <span class="text-lg">🤖</span> Cyberpunk
+                        </button>
+                        <button onclick="setTheme('neon')" class="p-3 rounded-2xl border-2 text-xs font-bold flex flex-col items-center gap-1.5 bg-zinc-900 text-purple-400 border-purple-500 hover:scale-105 transition">
+                            <span class="text-lg">⚡</span> Neon Dark
+                        </button>
+                        <button onclick="setTheme('pastel')" class="p-3 rounded-2xl border-2 text-xs font-bold flex flex-col items-center gap-1.5 bg-teal-100 text-blue-700 border-blue-400 hover:scale-105 transition">
+                            <span class="text-lg">🌿</span> Pastel Soft
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Input Owner Name -->
+                <div>
+                    <label class="block text-sm font-bold uppercase tracking-wider mb-2 text-gray-700 dark:text-gray-200">
+                        <i class="fas fa-user-edit mr-2"></i>2. Tên của bạn (Chủ bài Test):
+                    </label>
+                    <input type="text" id="owner-name-input" placeholder="Ví dụ: Hoàng Đội Trưởng, Linh Xinh..." class="w-full px-4 py-3.5 rounded-2xl border-2 border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white focus:outline-none focus:border-indigo-500 font-semibold text-lg shadow-sm">
+                </div>
+
+                <!-- Action Button -->
+                <button onclick="startCreatingQuiz()" class="w-full py-4 rounded-2xl font-extrabold text-lg shadow-lg btn-theme flex items-center justify-center gap-2">
+                    Bắt đầu Soạn Câu Hỏi <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SCREEN 2: CHỦ QUIZ TRẢ LỜI CÁC CÂU HỎI     -->
+        <!-- ========================================== -->
+        <div id="screen-create-quiz" class="glass-card rounded-3xl p-6 sm:p-8 hidden transition-all duration-300">
+            <!-- Progress Bar -->
+            <div class="mb-6">
+                <div class="flex justify-between text-xs font-bold mb-2 text-gray-600 dark:text-gray-300">
+                    <span id="create-progress-text">Câu hỏi 1 / 10</span>
+                    <span id="create-progress-percent">10%</span>
+                </div>
+                <div class="w-full h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div id="create-progress-bar" class="h-full transition-all duration-300 rounded-full" style="width: 10%; background-color: var(--accent);"></div>
+                </div>
+            </div>
+
+            <!-- Question Box & Customization Edit Toggle -->
+            <div class="space-y-4">
+                <div class="flex justify-between items-center">
+                    <span class="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+                        <i class="fas fa-edit mr-1"></i>Chỉnh sửa & Chọn đáp án đúng:
+                    </span>
+                    <button onclick="toggleEditMode()" id="btn-toggle-edit" class="px-3 py-1 rounded-xl text-xs font-extrabold bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 hover:scale-105 transition">
+                        <i class="fas fa-pen mr-1"></i> Sửa câu hỏi / đáp án
+                    </button>
+                </div>
+
+                <!-- Display Mode Title -->
+                <h3 id="create-question-title" class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white leading-snug">
+                    Món ăn nào tao có thể ăn liên tục cả tuần không chán?
+                </h3>
+
+                <!-- Edit Mode Inputs (Hidden by default) -->
+                <div id="edit-question-box" class="hidden space-y-3 bg-white/40 dark:bg-gray-800/40 p-3.5 rounded-2xl border border-indigo-200 dark:border-indigo-800">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Nội dung câu hỏi:</label>
+                        <input type="text" id="input-edit-qtitle" oninput="saveCustomQuestionTitle(this.value)" class="w-full px-3 py-2 text-sm rounded-xl border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white focus:outline-none focus:border-indigo-500 font-medium">
+                    </div>
+                </div>
+
+                <!-- Options Grid -->
+                <div id="create-options-container" class="grid grid-cols-1 gap-3 pt-1">
+                    <!-- Dynamic Options Inserted Here -->
+                </div>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div class="flex gap-3 mt-6">
+                <button id="btn-prev-question" onclick="prevQuestionOwner()" class="w-1/3 py-3 rounded-2xl font-bold text-gray-600 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 transition">
+                    <i class="fas fa-arrow-left mr-1"></i> Quay lại
+                </button>
+                <button id="btn-next-question" onclick="nextQuestionOwner()" class="w-2/3 py-3 rounded-2xl font-bold btn-theme flex items-center justify-center gap-2">
+                    Tiếp theo <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SCREEN 3: XUẤT LINK CHIA SẺ VÀ SAO CHÉP     -->
+        <!-- ========================================== -->
+        <div id="screen-share" class="glass-card rounded-3xl p-6 sm:p-8 hidden text-center transition-all duration-300">
+            <div class="text-5xl mb-3 animate-bounce">🎉</div>
+            <h2 class="text-2xl font-black text-gray-900 dark:text-white mb-2">Đã Tạo Xong Bài Test!</h2>
+            <p class="text-sm text-gray-600 dark:text-gray-300 mb-6">
+                Giờ hãy gửi đường link VIP này cho đám bạn thân qua Messenger/Zalo để thách thức chúng nó nhé!
+            </p>
+
+            <!-- Generated Link Box -->
+            <div class="bg-gray-100 dark:bg-gray-800/80 p-3.5 rounded-2xl flex items-center gap-2 border border-gray-300 dark:border-gray-700 mb-6 shadow-inner">
+                <input type="text" id="share-url-input" readonly class="w-full bg-transparent text-xs sm:text-sm font-mono font-semibold text-gray-700 dark:text-gray-200 outline-none select-all">
+                <button onclick="copyShareLink()" class="px-4 py-2.5 rounded-xl text-xs font-extrabold btn-theme whitespace-nowrap flex items-center gap-1.5">
+                    <i class="fas fa-copy"></i> Copy Link
+                </button>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="space-y-3">
+                <button onclick="openSelfQuiz()" class="w-full py-3.5 rounded-2xl font-bold bg-emerald-500 hover:bg-emerald-600 text-white shadow-md transition flex items-center justify-center gap-2">
+                    <i class="fas fa-play-circle"></i> Tự Trải Nghiệm Màn Trả Lời
+                </button>
+                <button onclick="resetApp()" class="w-full py-3 rounded-2xl font-bold bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200 hover:bg-gray-300 transition">
+                    <i class="fas fa-plus-circle mr-1"></i> Tạo Bài Test Khác
+                </button>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SCREEN 4: BẠN BÈ MỞ LINK -> NHẬP TÊN      -->
+        <!-- ========================================== -->
+        <div id="screen-friend-welcome" class="glass-card rounded-3xl p-6 sm:p-8 hidden text-center transition-all duration-300">
+            <div class="text-5xl mb-3">🔥</div>
+            <h2 class="text-2xl font-extrabold text-gray-900 dark:text-white mb-2">
+                Thử Thách Hiểu Nhau!
+            </h2>
+            <p class="text-sm text-gray-600 dark:text-gray-300 mb-6">
+                <span id="friend-owner-name" class="font-bold text-indigo-600 dark:text-indigo-400">Bạn mày</span> đã thách thức mày trả lời 10 câu hỏi để xem 2 đứa hiểu nhau tới mức nào!
+            </p>
+
+            <div class="text-left mb-6">
+                <label class="block text-xs font-bold uppercase tracking-wider mb-2 text-gray-700 dark:text-gray-200">
+                    Nhập Tên / Biệt Danh Của Mày:
+                </label>
+                <input type="text" id="friend-name-input" placeholder="Tên mày là gì? (Ví dụ: Tuấn Bịp, Trang..." class="w-full px-4 py-3.5 rounded-2xl border-2 border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white focus:outline-none focus:border-indigo-500 font-semibold text-lg">
+            </div>
+
+            <button onclick="startFriendQuiz()" class="w-full py-4 rounded-2xl font-black text-lg btn-theme flex items-center justify-center gap-2">
+                Vào Thi Ngay! <i class="fas fa-gamepad"></i>
+            </button>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SCREEN 5: BẠN BÈ TRẢ LỜI CÂU HỎI          -->
+        <!-- ========================================== -->
+        <div id="screen-friend-quiz" class="glass-card rounded-3xl p-6 sm:p-8 hidden transition-all duration-300">
+            <div class="mb-6">
+                <div class="flex justify-between text-xs font-bold mb-2 text-gray-600 dark:text-gray-300">
+                    <span id="friend-progress-text">Câu hỏi 1 / 10</span>
+                    <span id="friend-progress-percent">10%</span>
+                </div>
+                <div class="w-full h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div id="friend-progress-bar" class="h-full transition-all duration-300 rounded-full" style="width: 10%; background-color: var(--accent);"></div>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <h3 id="friend-question-title" class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white leading-snug">
+                    Món ăn nào tao có thể ăn liên tục cả tuần không chán?
+                </h3>
+
+                <div id="friend-options-container" class="grid grid-cols-1 gap-3 pt-2">
+                    <!-- Dynamic Options Inserted Here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SCREEN 6: KẾT QUẢ ĐIỂM SỐ BẠN BÈ          -->
+        <!-- ========================================== -->
+        <div id="screen-result" class="glass-card rounded-3xl p-6 sm:p-8 hidden text-center transition-all duration-300">
+            <div id="result-icon" class="text-6xl mb-3 animate-bounce">🏆</div>
+            <h2 class="text-xl font-bold text-gray-700 dark:text-gray-300">
+                <span id="res-friend-name" class="font-extrabold text-gray-900 dark:text-white">Bạn</span> & <span id="res-owner-name" class="font-extrabold text-gray-900 dark:text-white">Chủ bài</span>
+            </h2>
+
+            <!-- Score Circle -->
+            <div class="my-6">
+                <div class="inline-flex items-center justify-center p-6 rounded-full bg-white/40 dark:bg-gray-800/60 border-4 border-dashed border-indigo-400 shadow-xl">
+                    <span id="res-score-percent" class="text-5xl sm:text-6xl font-black tracking-tight text-indigo-600 dark:text-indigo-400">80%</span>
+                </div>
+                <p id="res-score-detail" class="text-sm font-semibold text-gray-500 dark:text-gray-400 mt-2">Đúng 8 / 10 câu</p>
+            </div>
+
+            <!-- Funny Comment Badge -->
+            <div class="p-4 rounded-2xl bg-indigo-50 dark:bg-gray-800 border border-indigo-200 dark:border-gray-700 mb-6">
+                <h4 id="res-comment-title" class="font-extrabold text-lg text-indigo-700 dark:text-indigo-300 mb-1">CẶP BÀI TRÙNG!</h4>
+                <p id="res-comment-body" class="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+                    Hai đứa mày chắc chắn trốn học đi chơi game chung nhiều lắm đúng không? Hiểu nhau vãi!
+                </p>
+            </div>
+
+            <!-- Review Answer Sheet -->
+            <div class="text-left mb-6">
+                <button onclick="toggleReviewSheet()" class="w-full py-2.5 px-4 rounded-xl bg-gray-200 dark:bg-gray-700 text-xs font-bold text-gray-700 dark:text-gray-200 flex justify-between items-center">
+                    <span><i class="fas fa-list-check mr-2"></i>Xem Chi Tiết Đáp Án Đúng / Sai</span>
+                    <i id="review-chevron" class="fas fa-chevron-down"></i>
+                </button>
+                
+                <div id="review-container" class="hidden mt-3 space-y-3 max-h-60 overflow-y-auto pr-1">
+                    <!-- Answer breakdown inserted dynamically -->
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="space-y-3">
+                <button onclick="copyCurrentShareLink()" class="w-full py-3.5 rounded-2xl font-extrabold btn-theme flex items-center justify-center gap-2">
+                    <i class="fas fa-share-nodes"></i> Gửi Link Cho Đứa Khác Chơi
+                </button>
+                <button onclick="resetToCreate()" class="w-full py-3 rounded-2xl font-bold bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200 hover:bg-gray-300 transition">
+                    <i class="fas fa-plus-circle mr-1"></i> Tự Tạo Bài Quiz Của Mày
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Default Bank of Funny Vietnamese Friendship Questions (Can be fully customized by user)
+        let customQuestions = [
+            {
+                q: "Món ăn nào tao có thể ăn liên tục cả tuần không biết chán?",
+                options: ["Mì tôm bơ trứng / Cơm tấm", "Bún đậu mắm tôm", "Trà sữa full topping", "Đồ nướng / Lẩu xèo xèo"]
+            },
+            {
+                q: "Lúc rảnh rỗi tao hay dành nhiều thời gian nhất làm gì?",
+                options: ["Lướt TikTok / Reels vô thức", "Ngủ nướng xuyên trưa", "Cày Game leo rank", "Nhắn tin chém gió / Hóng drama"]
+            },
+            {
+                q: "Tính xấu điển hình nhất của tao mà mày phải chịu đựng là gì?",
+                options: ["Trả lời tin nhắn siêu chậm (Lười rep)", "Hay dỗi vô cớ / Bão cảm xúc", "Nói nhiều như đài phát thanh", "Quá hoàn hảo không có điểm chê"]
+            },
+            {
+                q: "Gu âm nhạc tao khoái nhất dạo này?",
+                options: ["Rap Việt / HipHop sành điệu", "Lofi buồn sầu chill chill", "Nhạc Phonk / VinaHouse quẩy sung", "Pop V-Pop ngọt ngào nhẹ nhàng"]
+            },
+            {
+                q: "Khi gặp chuyện bực mình, tao sẽ ứng xử thế nào?",
+                options: ["Chửi thề xả stress ngay lập tức", "Im lặng giấu kín vào lòng", "Đi ăn thật nhiều cho bớt tức", "Rủ bạn thân đi cà phê bóc phốt"]
+            },
+            {
+                q: "Game hoặc hoạt động giải trí tao nghiện nhất?",
+                options: ["Liên Quân / Liên Minh Leo Rank", "Free Fire / PUBG bắn súng", "TFT / Đấu Trường Chân Lý", "Boardgame / Ma Sói / Cờ vua"]
+            },
+            {
+                q: "Nét tính cách nổi bật nhất của tao là gì?",
+                options: ["Hài hước, là cây hài của nhóm", "Lạnh lùng bên ngoài, ấm áp bên trong", "Tốt bụng, luôn quan tâm người khác", "Đang ngơ ngơ ngáo ngáo"]
+            },
+            {
+                q: "Thói quen xấu khi đi ngủ / buổi sáng của tao?",
+                options: ["Thức đêm tới 2-3h sáng mới ngủ", "Báo thức 10 cái vẫn không dậy", "Ngủ hay đạp chăn / nói mớ", "Dậy sớm tập thể dục (Chém gió đấy)"]
+            },
+            {
+                q: "Nếu được tặng 10 triệu đồng, tao sẽ làm gì đầu tiên?",
+                options: ["Mua quần áo / Mỹ phẩm / Đồ xịn", "Đi du lịch xả hơi", "Để dành tiết kiệm", "Rủ cả hội bạn đi ăn quẩy sạch"]
+            },
+            {
+                q: "Đố mày biết tao thuộc kiểu người nào sau đây?",
+                options: ["Hướng nội Part-time (Lúc sung lúc trầm)", "Hướng ngoại cừ khôi (Đâu cũng là nhà)", "Hướng đến đồ ăn ngon", "Hướng tới sự giàu có"]
+            }
+        ];
+
+        // Global App State
+        let currentTheme = 'cute';
+        let ownerName = '';
+        let ownerAnswers = [];
+        let currentCreateIdx = 0;
+        let isEditMode = false;
+        
+        let quizDataFromURL = null;
+        let friendName = '';
+        let friendAnswers = [];
+        let currentFriendIdx = 0;
+
+        function setTheme(theme) {
+            currentTheme = theme;
+            document.body.className = `theme-${theme} min-h-screen flex items-center justify-center p-3 sm:p-6 transition-all duration-500 text-gray-800`;
+            showToast("Đã đổi phong cách giao diện!", "fa-palette");
+        }
+
+        function showToast(msg, icon = "fa-check-circle") {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            document.getElementById('toast-icon').className = `fas ${icon} text-green-400 text-lg`;
+            toast.classList.remove('-translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('-translate-y-20', 'opacity-0');
+            }, 2500);
+        }
+
+        window.onload = function() {
+            // Check if URL contains quiz payload data (`?quiz=...`)
+            const urlParams = new URLSearchParams(window.location.search);
+            const quizParam = urlParams.get('quiz');
+
+            if (quizParam) {
+                try {
+                    // Decode Base64 JSON Payload safely
+                    const decoded = decodeURIComponent(escape(atob(quizParam)));
+                    quizDataFromURL = JSON.parse(decoded);
+
+                    if (quizDataFromURL && quizDataFromURL.name && quizDataFromURL.answers) {
+                        // Apply quiz theme if set
+                        if (quizDataFromURL.theme) setTheme(quizDataFromURL.theme);
+                        
+                        // Switch directly to Friend Welcome Screen
+                        document.getElementById('screen-setup').classList.add('hidden');
+                        document.getElementById('screen-friend-welcome').classList.remove('hidden');
+                        document.getElementById('friend-owner-name').innerText = quizDataFromURL.name;
+                        document.getElementById('app-subtitle').innerText = `Bài test trắc nghiệm từ ${quizDataFromURL.name}`;
+                        return;
+                    }
+                } catch (e) {
+                    console.error("Lỗi đọc dữ liệu Quiz từ URL:", e);
+                }
+            }
+
+            // Default State: Owner Setup
+            ownerAnswers = new Array(DEFAULT_QUESTIONS.length).fill(null);
+        };
+
+        function startCreatingQuiz() {
+            const input = document.getElementById('owner-name-input').value.trim();
+            if (!input) {
+                showToast("Vui lòng nhập tên của bạn!", "fa-exclamation-triangle");
+                return;
+            }
+            ownerName = input;
+            ownerAnswers = new Array(customQuestions.length).fill(null);
+
+            document.getElementById('screen-setup').classList.add('hidden');
+            document.getElementById('screen-create-quiz').classList.remove('hidden');
+            
+            isEditMode = false;
+            renderCreateQuestion(0);
+        }
+
+        function renderCreateQuestion(idx) {
+            currentCreateIdx = idx;
+            const qData = customQuestions[idx];
+
+            // Update Progress Bar
+            const percent = Math.round(((idx + 1) / customQuestions.length) * 100);
+            document.getElementById('create-progress-text').innerText = `Câu hỏi ${idx + 1} / ${customQuestions.length}`;
+            document.getElementById('create-progress-percent').innerText = `${percent}%`;
+            document.getElementById('create-progress-bar').style.width = `${percent}%`;
+
+            // Title Display & Title Edit Input
+            document.getElementById('create-question-title').innerText = qData.q;
+            document.getElementById('input-edit-qtitle').value = qData.q;
+
+            // Toggle Edit Box visibility
+            const editBox = document.getElementById('edit-question-box');
+            const toggleBtn = document.getElementById('btn-toggle-edit');
+            if (isEditMode) {
+                editBox.classList.remove('hidden');
+                toggleBtn.innerHTML = `<i class="fas fa-check mr-1"></i> Xong chỉnh sửa`;
+            } else {
+                editBox.classList.add('hidden');
+                toggleBtn.innerHTML = `<i class="fas fa-pen mr-1"></i> Sửa câu hỏi / đáp án`;
+            }
+
+            // Render Options
+            const container = document.getElementById('create-options-container');
+            container.innerHTML = '';
+
+            qData.options.forEach((optText, optIdx) => {
+                const isSelected = ownerAnswers[idx] === optIdx;
+                const wrapper = document.createElement('div');
+                wrapper.className = `option-card rounded-2xl border-2 transition-all ${
+                    isSelected ? 'selected bg-indigo-50 border-indigo-500 dark:bg-indigo-900/40' : 'bg-white/60 dark:bg-gray-800/60 border-gray-200 dark:border-gray-700'
+                }`;
+
+                if (isEditMode) {
+                    // Edit Mode UI: Input field + Selection radio button
+                    wrapper.className += ' p-3 flex items-center gap-3';
+                    wrapper.innerHTML = `
+                        <button onclick="selectOwnerAnswer(${optIdx})" class="flex-none p-1 text-indigo-600 dark:text-indigo-400">
+                            <i class="fas ${isSelected ? 'fa-check-circle' : 'fa-circle text-gray-300 dark:text-gray-600'} text-2xl"></i>
+                        </button>
+                        <input type="text" value="${optText.replace(/"/g, '&quot;')}" oninput="saveCustomOptionText(${optIdx}, this.value)" placeholder="Nhập đáp án ${optIdx + 1}..." class="w-full px-3 py-2 text-sm rounded-xl border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white font-medium focus:outline-none focus:border-indigo-500">
+                    `;
+                } else {
+                    // Normal Mode UI: Clickable card
+                    wrapper.className += ' p-4 flex items-center justify-between cursor-pointer';
+                    wrapper.onclick = () => selectOwnerAnswer(optIdx);
+                    wrapper.innerHTML = `
+                        <span class="text-sm sm:text-base font-semibold dark:text-white">${optText}</span>
+                        <i class="fas ${isSelected ? 'fa-check-circle text-indigo-600 dark:text-indigo-400' : 'fa-circle text-gray-300 dark:text-gray-600'} text-lg"></i>
+                    `;
+                }
+
+                container.appendChild(wrapper);
+            });
+
+            // Toggle Navigation Buttons
+            document.getElementById('btn-prev-question').style.visibility = idx === 0 ? 'hidden' : 'visible';
+            
+            const nextBtn = document.getElementById('btn-next-question');
+            if (idx === customQuestions.length - 1) {
+                nextBtn.innerHTML = `Hoàn Thành & Lấy Link <i class="fas fa-magic ml-1"></i>`;
+            } else {
+                nextBtn.innerHTML = `Tiếp theo <i class="fas fa-arrow-right ml-1"></i>`;
+            }
+        }
+
+        function toggleEditMode() {
+            isEditMode = !isEditMode;
+            renderCreateQuestion(currentCreateIdx);
+        }
+
+        function saveCustomQuestionTitle(newTitle) {
+            customQuestions[currentCreateIdx].q = newTitle;
+            document.getElementById('create-question-title').innerText = newTitle;
+        }
+
+        function saveCustomOptionText(optIdx, newText) {
+            customQuestions[currentCreateIdx].options[optIdx] = newText;
+        }
+
+        function selectOwnerAnswer(optIdx) {
+            ownerAnswers[currentCreateIdx] = optIdx;
+            renderCreateQuestion(currentCreateIdx);
+        }
+
+        function nextQuestionOwner() {
+            if (ownerAnswers[currentCreateIdx] === null) {
+                showToast("Hãy chọn 1 đáp án đúng cho câu hỏi này!", "fa-hand-pointer");
+                return;
+            }
+
+            if (currentCreateIdx < customQuestions.length - 1) {
+                renderCreateQuestion(currentCreateIdx + 1);
+            } else {
+                generateShareableLink();
+            }
+        }
+
+        function prevQuestionOwner() {
+            if (currentCreateIdx > 0) {
+                renderCreateQuestion(currentCreateIdx - 1);
+            }
+        }
+
+        function generateShareableLink() {
+            // Encode custom questions & options along with answers
+            const payload = {
+                name: ownerName,
+                theme: currentTheme,
+                answers: ownerAnswers,
+                questions: customQuestions
+            };
+
+            const jsonStr = JSON.stringify(payload);
+            const encoded = btoa(unescape(encodeURIComponent(jsonStr)));
+
+            const baseUrl = window.location.origin + window.location.pathname;
+            const fullShareUrl = `${baseUrl}?quiz=${encoded}`;
+
+            document.getElementById('screen-create-quiz').classList.add('hidden');
+            document.getElementById('screen-share').classList.remove('hidden');
+            document.getElementById('share-url-input').value = fullShareUrl;
+
+            confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+        }
+
+        function renderFriendQuestion(idx) {
+            currentFriendIdx = idx;
+            // Use URL questions if available, otherwise fallback to local customQuestions
+            const activeQuestions = (quizDataFromURL && quizDataFromURL.questions) ? quizDataFromURL.questions : customQuestions;
+            const qData = activeQuestions[idx];
+
+            // Progress Bar
+            const percent = Math.round(((idx + 1) / activeQuestions.length) * 100);
+            document.getElementById('friend-progress-text').innerText = `Câu hỏi ${idx + 1} / ${activeQuestions.length}`;
+            document.getElementById('friend-progress-percent').innerText = `${percent}%`;
+            document.getElementById('friend-progress-bar').style.width = `${percent}%`;
+
+            // Question Title
+            document.getElementById('friend-question-title').innerText = qData.q;
+
+            // Render Options
+            const container = document.getElementById('friend-options-container');
+            container.innerHTML = '';
+
+            qData.options.forEach((optText, optIdx) => {
+                const btn = document.createElement('button');
+                btn.className = `option-card text-left p-4 rounded-2xl font-semibold border-2 flex items-center justify-between bg-white/60 dark:bg-gray-800/60 border-gray-200 dark:border-gray-700 dark:text-white`;
+                btn.onclick = () => selectFriendAnswer(optIdx);
+
+                btn.innerHTML = `
+                    <span class="text-sm sm:text-base">${optText}</span>
+                    <i class="far fa-circle text-gray-300 dark:text-gray-600 text-lg"></i>
+                `;
+                container.appendChild(btn);
+            });
+        }
+
+        function selectFriendAnswer(optIdx) {
+            friendAnswers[currentFriendIdx] = optIdx;
+            const activeQuestions = (quizDataFromURL && quizDataFromURL.questions) ? quizDataFromURL.questions : customQuestions;
+
+            if (currentFriendIdx < activeQuestions.length - 1) {
+                renderFriendQuestion(currentFriendIdx + 1);
+            } else {
+                calculateAndShowResults();
+            }
+        }
+
+        function calculateAndShowResults() {
+            const targetAnswers = quizDataFromURL ? quizDataFromURL.answers : ownerAnswers;
+            const targetOwnerName = quizDataFromURL ? quizDataFromURL.name : ownerName;
+            const activeQuestions = (quizDataFromURL && quizDataFromURL.questions) ? quizDataFromURL.questions : customQuestions;
+
+            let correctCount = 0;
+            targetAnswers.forEach((ans, idx) => {
+                if (ans === friendAnswers[idx]) {
+                    correctCount++;
+                }
+            });
+
+            const percentScore = Math.round((correctCount / activeQuestions.length) * 100);
+
+            document.getElementById('screen-friend-quiz').classList.add('hidden');
+            document.getElementById('screen-result').classList.remove('hidden');
+
+            document.getElementById('res-friend-name').innerText = friendName;
+            document.getElementById('res-owner-name').innerText = targetOwnerName;
+            document.getElementById('res-score-percent').innerText = `${percentScore}%`;
+            document.getElementById('res-score-detail').innerText = `Đúng ${correctCount} / ${activeQuestions.length} câu hỏi`;
+
+            const titleEl = document.getElementById('res-comment-title');
+            const bodyEl = document.getElementById('res-comment-body');
+            const iconEl = document.getElementById('result-icon');
+
+            if (percentScore === 100) {
+                iconEl.innerText = "👑";
+                titleEl.innerText = "TRI KỶ ĐÍCH THỰC - TÂM ĐỒNG Ý HỢP!";
+                bodyEl.innerText = `Không thể tin nổi! ${friendName} hiểu ${targetOwnerName} đến từng chân tơ kẽ tóc. Hai đứa mày chắc chắn là một cặp thần thánh!`;
+                confetti({ particleCount: 150, spread: 90, origin: { y: 0.5 } });
+            } else if (percentScore >= 80) {
+                iconEl.innerText = "🔥";
+                titleEl.innerText = "CẶP BÀI TRÙNG GIỎI GIANG!";
+                bodyEl.innerText = `Hiểu nhau vãi chưởng! ${friendName} và ${targetOwnerName} chắc chắn trốn học đi chơi chung nhiều lắm đúng không?`;
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+            } else if (percentScore >= 50) {
+                iconEl.innerText = "🤝";
+                titleEl.innerText = "BẠN THÂN TRUNG BÌNH CỘNG!";
+                bodyEl.innerText = `Mức độ hiểu nhau vừa đủ xài. Cần đi ăn lẩu, uống trà sữa bóc phốt nhau nhiều hơn để nâng cấp tình bạn nhé!`;
+            } else if (percentScore >= 20) {
+                iconEl.innerText = "😅";
+                titleEl.innerText = "BẠN XÃ GIAO QUA ĐƯỜNG!";
+                bodyEl.innerText = `Hơi xui! Hẳn là ${friendName} chỉ gặp ${targetOwnerName} lúc đi mượn tiền hoặc đòi nợ thôi đúng không?`;
+            } else {
+                iconEl.innerText = "🤡";
+                titleEl.innerText = "BẠN THÂN AI NẤY LO!";
+                bodyEl.innerText = `Cú lừa thế kỷ! Trả lời sai gần hết. Hai đứa mày là người dưng ngược lối đóng giả làm bạn thân à?`;
+            }
+
+            buildReviewContainer(targetAnswers, activeQuestions);
+        }
+
+        function buildReviewContainer(targetAnswers, activeQuestions) {
+            const container = document.getElementById('review-container');
+            container.innerHTML = '';
+
+            activeQuestions.forEach((qObj, idx) => {
+                const friendAnsIdx = friendAnswers[idx];
+                const ownerAnsIdx = targetAnswers[idx];
+                const isCorrect = friendAnsIdx === ownerAnsIdx;
+
+                const item = document.createElement('div');
+                item.className = `p-3 rounded-xl border text-xs leading-relaxed ${
+                    isCorrect ? 'bg-green-50 border-green-300 dark:bg-green-950/40 dark:border-green-800' : 'bg-red-50 border-red-300 dark:bg-red-950/40 dark:border-red-800'
+                }`;
+
+                item.innerHTML = `
+                    <p class="font-bold text-gray-800 dark:text-gray-200 mb-1">Câu ${idx + 1}: ${qObj.q}</p>
+                    <p class="${isCorrect ? 'text-green-700 dark:text-green-300' : 'text-red-600 dark:text-red-300'} font-semibold">
+                        <i class="fas ${isCorrect ? 'fa-check' : 'fa-times'} mr-1"></i> Mày chọn: ${qObj.options[friendAnsIdx]}
+                    </p>
+                    ${!isCorrect ? `<p class="text-gray-600 dark:text-gray-400 font-semibold mt-0.5"><i class="fas fa-check text-green-500 mr-1"></i> Đáp án chuẩn: ${qObj.options[ownerAnsIdx]}</p>` : ''}
+                `;
+                container.appendChild(item);
+            });
+        }
+    </script>
+</body>
+</html>
